@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-petapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-petapp
+  template:
+    metadata:
+      labels:
+        app: db-petapp
+    spec:
+      containers:
+      - name: db-petapp
+        image: mysql:8.0
+        ports:
+        - name: db-port
+          containerPort: 3306
+        volumeMounts:
+            - name: db-volume
+              mountPath: /var/lib/mysql 
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: dbRoot-pass
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: pet-user
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: petUser-pass
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: database
+      volumes:
+        - name: db-volume
+          persistentVolumeClaim:
+            claimName: db-pvc
