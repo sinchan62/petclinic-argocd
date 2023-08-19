@@ -14,7 +14,22 @@ spec:
     spec:
       containers:
       - name: pet-app
-        image: rrohit62/petclinic-app:latest
+        image: sharath2787/petclinic:3
         ports:
         - name: petapp-port
           containerPort: 8080
+        env:
+              - name: MYSQL_URL
+                value: "jdbc:mysql://db-petapp:3306/petclinic"
+              - name: MYSQL_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: db-secret
+                    key: pet-user
+              - name: MYSQL_PASS
+                valueFrom:
+                  secretKeyRef:
+                    name: db-secret
+                    key: petUser-pass
+
+      
