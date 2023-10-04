@@ -1,9 +1,10 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pet-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: pet-app
@@ -14,22 +15,34 @@ spec:
     spec:
       containers:
       - name: pet-app
-        image: sharath2787/petclinic:3
+        image: rrohit62/petclinic-app:tagname
         ports:
         - name: petapp-port
           containerPort: 8080
-        env:
-              - name: MYSQL_URL
-                value: "jdbc:mysql://db-petapp:3306/petclinic"
-              - name: MYSQL_USER
-                valueFrom:
-                  secretKeyRef:
-                    name: db-secret
-                    key: pet-user
-              - name: MYSQL_PASS
-                valueFrom:
-                  secretKeyRef:
-                    name: db-secret
-                    key: petUser-pass
-
-      
+        
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: pet-app-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pet-app
+  minReplicas: 1
+  maxReplicas: 9
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+  selector:
+    matchLabels:
+      app: pet-app  # Match the labels of the pods to autoscale
+  template:
+    metadata:
+      labels:
+        app: pet-app

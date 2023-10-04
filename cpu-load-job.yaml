@@ -1,0 +1,13 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cpu-load-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: cpu-load-container
+        image: busybox
+        command: ["/bin/sh", "-c"]
+        args: ["while true; do dd if=/dev/urandom of=/dev/null; done"]
+      restartPolicy: OnFailure

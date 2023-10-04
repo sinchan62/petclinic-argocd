@@ -1,9 +1,10 @@
+--- 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: db-petapp
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: db-petapp
@@ -46,3 +47,30 @@ spec:
         - name: db-volume
           persistentVolumeClaim:
             claimName: db-pvc
+    
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: db-petapp-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: db-petapp
+  minReplicas: 1
+  maxReplicas: 9
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+  selector:
+    matchLabels:
+      app: db-petapp
+  template:
+    metadata:
+      labels:
+         app: db-petapp
